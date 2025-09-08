@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Libros - Sistema de Biblioteca ITP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #18335d;
+            --primary-dark: #0f2242;
+            --secondary: #4caf50;
+            --accent: #ff9800;
+            --light: #f5f7fa;
+            --dark: #333;
+            --danger: #f44336;
+            --success: #4caf50;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        /* Contenedor principal */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Encabezado */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 3px solid var(--accent);
+        }
+        
+        .title {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+        
+        /* Información de usuario */
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .user-detail {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        /* Barra de búsqueda */
+        .search-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        /* Lista de libros */
+        .libros-container {
+            margin-bottom: 30px;
+        }
+        
+        .libro {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .libro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+        
+        .libro.disponible::before {
+            background: var(--success);
+        }
+        
+        .libro.prestado::before {
+            background: var(--danger);
+        }
+        
+        .libro:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .libro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .libro-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .libro-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .disponible .libro-status {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .prestado .libro-status {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+        
+        .libro-details {
+            margin-bottom: 15px;
+        }
+        
+        .libro-details p {
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .libro-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Modal de detalles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideInUp 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-details {
+            margin-bottom: 20px;
+        }
+        
+        .modal-details p {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Navegación */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            .search-filters {
+                flex-direction: column;
+            }
+            
+            .libro-header {
+                flex-direction: column;
+            }
+            
+            .libro-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .libro-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                justify-content: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo">ITP</div>
+                <div>
+                    <h1 class="title">Instituto Tecnológico de Puebla</h1>
+                    <p class="subtitle">Consulta de Libros - Centro de Investigación</p>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Información de usuario -->
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-detail">
+                    <i class="fas fa-user"></i> <span id="user-name">Emilio Octaviano Gonzalez</span>
+                </div>
+                <div class="user-detail">
+                    <i class="fas fa-id-card"></i> Número de Control: <span id="user-id">23221141</span>
+                </div>
+            </div>
+            <div class="user-details">
+                <div class="user-detail">
+                    <i class="fas fa-clock"></i> Hora actual: <span id="current-time">--:--:--</span>
+                </div>
+                <div class="user-detail">
+                    <i class="fas fa-book"></i> Libros disponibles: <span id="available-books">4</span>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="page-title" style="text-align: center; color: white; margin-bottom: 10px;">Consultar Libros</h2>
+        <p style="text-align: center; color: rgba(255, 255, 255, 0.9); margin-bottom: 30px;">Busca en nuestro catálogo de libros disponibles. Todos los libros están actualmente disponibles para préstamo.</p>
+        
+        <!-- Barra de búsqueda -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Buscar por título, autor, ISBN o materia...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            
+            <div class="search-filters">
+                <div class="filter-group">
+                    <label for="categoria">Categoría</label>
+                    <select id="categoria">
+                        <option value="">Todas las categorías</option>
+                        <option value="ciencia">Ciencia</option>
+                        <option value="tecnologia">Tecnología</option>
+                        <option value="matematicas">Matemáticas</option>
+                        <option value="literatura">Literatura</option>
+                        <option value="historia">Historia</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="estado">Estado</label>
+                    <select id="estado">
+                        <option value="">Todos</option>
+                        <option value="disponible">Disponible</option>
+                        <option value="prestado">Prestado</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="orden">Ordenar por</label>
+                    <select id="orden">
+                        <option value="titulo">Título A-Z</option>
+                        <option value="autor">Autor</option>
+                        <option value="fecha">Fecha de publicación</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lista de libros - TODOS DISPONIBLES -->
+        <div class="libros-container">
+            <div class="libro disponible">
+                <div class="libro-header">
+                    <div>
+                        <h3 class="libro-title">Introducción a la Programación</h3>
+                        <span class="libro-status">Disponible</span>
+                    </div>
+                </div>
+                <div class="libro-details">
+                    <p><strong>Autor:</strong> Luis García Martínez</p>
+                    <p><strong>ISBN:</strong> 978-1234567890</p>
+                    <p><strong>Categoría:</strong> Tecnología, Programación</p>
+                    <p><strong>Ubicación:</strong> Estante A-12</p>
+                    <p><strong>Estado:</strong> Disponible para préstamo</p>
+                </div>
+                <div class="libro-actions">
+                    <button class="btn detalle-btn" data-libro="1">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-bookmark"></i> Reservar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="libro disponible">
+                <div class="libro-header">
+                    <div>
+                        <h3 class="libro-title">Matemáticas Avanzadas</h3>
+                        <span class="libro-status">Disponible</span>
+                    </div>
+                </div>
+                <div class="libro-details">
+                    <p><strong>Autor:</strong> María Rodríguez Sánchez</p>
+                    <p><strong>ISBN:</strong> 978-0987654321</p>
+                    <p><strong>Categoría:</strong> Matemáticas</p>
+                    <p><strong>Ubicación:</strong> Estante B-07</p>
+                    <p><strong>Estado:</strong> Disponible para préstamo</p>
+                </div>
+                <div class="libro-actions">
+                    <button class="btn detalle-btn" data-libro="2">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-bookmark"></i> Reservar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="libro disponible">
+                <div class="libro-header">
+                    <div>
+                        <h3 class="libro-title">Historia de la Computación</h3>
+                        <span class="libro-status">Disponible</span>
+                    </div>
+                </div>
+                <div class="libro-details">
+                    <p><strong>Autor:</strong> Carlos Hernández López</p>
+                    <p><strong>ISBN:</strong> 978-5432167890</p>
+                    <p><strong>Categoría:</strong> Historia, Tecnología</p>
+                    <p><strong>Ubicación:</strong> Estante C-03</p>
+                    <p><strong>Estado:</strong> Disponible para préstamo</p>
+                </div>
+                <div class="libro-actions">
+                    <button class="btn detalle-btn" data-libro="3">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-bookmark"></i> Reservar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="libro disponible">
+                <div class="libro-header">
+                    <div>
+                        <h3 class="libro-title">Física Cuántica para Principiantes</h3>
+                        <span class="libro-status">Disponible</span>
+                    </div>
+                </div>
+                <div class="libro-details">
+                    <p><strong>Autor:</strong> Ana Martínez Torres</p>
+                    <p><strong>ISBN:</strong> 978-1357924680</p>
+                    <p><strong>Categoría:</strong> Ciencia, Física</p>
+                    <p><strong>Ubicación:</strong> Estante D-15</p>
+                    <p><strong>Estado:</strong> Disponible para préstamo</p>
+                </div>
+                <div class="libro-actions">
+                    <button class="btn detalle-btn" data-libro="4">
+                        <i class="fas fa-info-circle"></i> Ver Detalles
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-bookmark"></i> Reservar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="menu.html" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Menú Principal
+            </a>
+            <a href="mis-prestamos.html" class="nav-btn">
+                <i class="fas fa-list"></i> Ver Mis Préstamos
+            </a>
+        </div>
+        
+        <footer>
+            <p>Sistema de Gestión de Biblioteca - © 2023 Instituto Tecnológico de Puebla</p>
+            <p>Versión 2.0 - Sistema en Tiempo Real | Usuario: <span id="footer-user">23221141</span></p>
+        </footer>
+    </div>
+    
+    <!-- Modal de detalles del libro -->
+    <div id="detalle-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-libro-titulo">Título del Libro</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-details">
+                    <p><strong>Autor:</strong> <span id="modal-libro-autor"></span></p>
+                    <p><strong>ISBN:</strong> <span id="modal-libro-isbn"></span></p>
+                    <p><strong>Categoría:</strong> <span id="modal-libro-categoria"></span></p>
+                    <p><strong>Año de publicación:</strong> <span id="modal-libro-anio"></span></p>
+                    <p><strong>Editorial:</strong> <span id="modal-libro-editorial"></span></p>
+                    <p><strong>Páginas:</strong> <span id="modal-libro-paginas"></span></p>
+                    <p><strong>Idioma:</strong> <span id="modal-libro-idioma"></span></p>
+                    <p><strong>Estado:</strong> <span id="modal-libro-estado"></span></p>
+                    <p><strong>Ubicación:</strong> <span id="modal-libro-ubicacion"></span></p>
+                </div>
+                <div>
+                    <h3>Descripción</h3>
+                    <p id="modal-libro-descripcion"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="close-detalle">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+                <button class="btn" id="solicitar-prestamo">
+                    <i class="fas fa-book"></i> Solicitar Préstamo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo para los libros
+        const libros = {
+            1: {
+                titulo: "Introducción a la Programación",
+                autor: "Luis García Martínez",
+                isbn: "978-1234567890",
+                categoria: "Tecnología, Programación",
+                anio: "2022",
+                editorial: "Editorial Tecnológica",
+                paginas: "350",
+                idioma: "Español",
+                estado: "Disponible",
+                ubicacion: "Estante A-12",
+                descripcion: "Este libro ofrece una introducción completa a los conceptos fundamentales de la programación, ideal para principiantes. Cubre los principios básicos de algoritmos, estructuras de datos y los fundamentos de varios lenguajes de programación."
+            },
+            2: {
+                titulo: "Matemáticas Avanzadas",
+                autor: "María Rodríguez Sánchez",
+                isbn: "978-0987654321",
+                categoria: "Matemáticas",
+                anio: "2021",
+                editorial: "Editorial Científica",
+                paginas: "480",
+                idioma: "Español",
+                estado: "Disponible",
+                ubicacion: "Estante B-07",
+                descripcion: "Un texto completo que cubre temas avanzados de matemáticas, incluyendo cálculo multivariable, ecuaciones diferenciales y álgebra lineal. Incluye ejercicios prácticos y ejemplos detallados."
+            },
+            3: {
+                titulo: "Historia de la Computación",
+                autor: "Carlos Hernández López",
+                isbn: "978-5432167890",
+                categoria: "Historia, Tecnología",
+                anio: "2020",
+                editorial: "Editorial Histórica",
+                paginas: "295",
+                idioma: "Español",
+                estado: "Disponible",
+                ubicacion: "Estante C-03",
+                descripcion: "Un recorrido fascinante por la historia de la computación, desde los primeros dispositivos de cálculo hasta la era moderna de la inteligencia artificial y la computación cuántica."
+            },
+            4: {
+                titulo: "Física Cuántica para Principiantes",
+                autor: "Ana Martínez Torres",
+                isbn: "978-1357924680",
+                categoria: "Ciencia, Física",
+                anio: "2023",
+                editorial: "Editorial Científica",
+                paginas: "320",
+                idioma: "Español",
+                estado: "Disponible",
+                ubicacion: "Estante D-15",
+                descripcion: "Una introducción accesible a los conceptos fundamentales de la física cuántica, diseñada para estudiantes и entusiastas sin formación previa en el área. Incluye ilustraciones y ejemplos prácticos."
+            }
+        };
+
+        // Cargar información del usuario desde sessionStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            if (userData) {
+                document.getElementById('user-name').textContent = userData.name;
+                document.getElementById('user-id').textContent = userData.controlNumber;
+                document.getElementById('footer-user').textContent = userData.controlNumber;
+            } else {
+                // Si no hay datos de usuario, redirigir al login
+                window.location.href = 'index.html';
+            }
+            
+            // Iniciar reloj en tiempo real
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Actualizar contador de libros disponibles
+            updateAvailableBooks();
+        });
+        
+        // Actualizar reloj
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        // Actualizar contador de libros disponibles
+        function updateAvailableBooks() {
+            const disponibles = document.querySelectorAll('.libro.disponible').length;
+            document.getElementById('available-books').textContent = disponibles;
+        }
+        
+        // Funcionalidad para el modal de detalles
+        document.querySelectorAll('.detalle-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const libroId = this.getAttribute('data-libro');
+                const libro = libros[libroId];
+                
+                if (libro) {
+                    document.getElementById('modal-libro-titulo').textContent = libro.titulo;
+                    document.getElementById('modal-libro-autor').textContent = libro.autor;
+                    document.getElementById('modal-libro-isbn').textContent = libro.isbn;
+                    document.getElementById('modal-libro-categoria').textContent = libro.categoria;
+                    document.getElementById('modal-libro-anio').textContent = libro.anio;
+                    document.getElementById('modal-libro-editorial').textContent = libro.editorial;
+                    document.getElementById('modal-libro-paginas').textContent = libro.paginas;
+                    document.getElementById('modal-libro-idioma').textContent = libro.idioma;
+                    document.getElementById('modal-libro-estado').textContent = libro.estado;
+                    document.getElementById('modal-libro-ubicacion').textContent = libro.ubicacion;
+                    document.getElementById('modal-libro-descripcion').textContent = libro.descripcion;
+                    
+                    document.getElementById('detalle-modal').style.display = 'flex';
+                }
+            });
+        });
+        
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('detalle-modal').style.display = 'none';
+        });
+        
+        document.getElementById('close-detalle').addEventListener('click', function() {
+            document.getElementById('detalle-modal').style.display = 'none';
+        });
+        
+        document.getElementById('solicitar-prestamo').addEventListener('click', function() {
+            const titulo = document.getElementById('modal-libro-titulo').textContent;
+            alert(`Préstamo solicitado para: ${titulo}\nSe le notificará cuando el libro esté disponible.`);
+            
+            // Obtener información del usuario
+            const userData = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            // Registrar en historial
+            const movimiento = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                tipo: 'solicitud_prestamo',
+                usuario: userData.controlNumber,
+                detalles: {
+                    libro: titulo,
+                    estado: 'solicitado'
+                },
+                estado: 'pendiente'
+            };
+            
+            // Guardar en el historial (simulado)
+            let historial = JSON.parse(localStorage.getItem('historial_libros') || '[]');
+            historial.push(movimiento);
+            localStorage.setItem('historial_libros', JSON.stringify(historial));
+            
+            document.getElementById('detalle-modal').style.display = 'none';
+        });
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('detalle-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Funcionalidad de búsqueda
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            const categoria = document.getElementById('categoria').value;
+            const estado = document.getElementById('estado').value;
+            
+            // Filtrar libros (simulación)
+            const librosElements = document.querySelectorAll('.libro');
+            let encontrados = 0;
+            
+            librosElements.forEach(libro => {
+                const titulo = libro.querySelector('.libro-title').textContent.toLowerCase();
+                const autor = libro.querySelector('.libro-details p:nth-child(1)').textContent.toLowerCase();
+                const cat = libro.querySelector('.libro-details p:nth-child(3)').textContent.toLowerCase();
+                const stat = libro.classList.contains('disponible') ? 'disponible' : 'prestado';
+                
+                const coincideBusqueda = titulo.includes(searchTerm) || autor.includes(searchTerm);
+                const coincideCategoria = !categoria || cat.includes(categoria);
+                const coincideEstado = !estado || stat === estado;
+                
+                if (coincideBusqueda && coincideCategoria && coincideEstado) {
+                    libro.style.display = 'block';
+                    encontrados++;
+                } else {
+                    libro.style.display = 'none';
+                }
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            if (encontrados === 0) {
+                alert('No se encontraron libros que coincidan con los criterios de búsqueda.');
+            }
+        });
+    </script>
+</body>
+</html>

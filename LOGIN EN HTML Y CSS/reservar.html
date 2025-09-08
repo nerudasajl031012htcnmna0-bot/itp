@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Cubículos - Sistema de Biblioteca ITP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #18335d;
+            --primary-dark: #0f2242;
+            --secondary: #4caf50;
+            --accent: #ff9800;
+            --light: #f5f7fa;
+            --dark: #333;
+            --danger: #f44336;
+            --success: #4caf50;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        /* Contenedor principal */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Encabezado */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 3px solid var(--accent);
+        }
+        
+        .title {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+        
+        /* Información de usuario */
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .user-detail {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        /* Filtros */
+        .filters {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filters h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .filter-item select, 
+        .filter-item input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        /* Cubículos */
+        .cubiculos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .cubiculo {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cubiculo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+        
+        .cubiculo.disponible::before {
+            background: var(--success);
+        }
+        
+        .cubiculo.ocupado::before {
+            background: var(--danger);
+        }
+        
+        .cubiculo.reservado::before {
+            background: var(--accent);
+        }
+        
+        .cubiculo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cubiculo h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .estado {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .disponible .estado {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .ocupado .estado {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+        
+        .reservado .estado {
+            background-color: #fff3e0;
+            color: var(--accent);
+        }
+        
+        .detalles {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .detalles p {
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Modal de reserva */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideInUp 0.3s ease;
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .btn-cancel {
+            background: var(--danger);
+        }
+        
+        .btn-cancel:hover {
+            background: #d32f2f;
+        }
+        
+        /* Navegación */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cubiculos-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                justify-content: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo">ITP</div>
+                <div>
+                    <h1 class="title">Instituto Tecnológico de Puebla</h1>
+                    <p class="subtitle">Sistema de Reservación de Cubículos - Centro de Investigación</p>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Información de usuario -->
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-detail">
+                    <i class="fas fa-user"></i> <span id="user-name">Emilio Octaviano Gonzalez</span>
+                </div>
+                <div class="user-detail">
+                    <i class="fas fa-id-card"></i> Número de Control: <span id="user-id">23221141</span>
+                </div>
+            </div>
+            <div class="user-details">
+                <div class="user-detail">
+                    <i class="fas fa-clock"></i> Hora actual: <span id="current-time">--:--:--</span>
+                </div>
+                <div class="user-detail">
+                    <i class="fas fa-door-open"></i> Cubículos disponibles: <span id="available-cubicles">6/6</span>
+                </div>
+            </div>
+        </div>
+        
+        <h2 class="page-title" style="text-align: center; color: white; margin-bottom: 10px;">Reservar Cubículo de Estudio</h2>
+        <p style="text-align: center; color: rgba(255, 255, 255, 0.9); margin-bottom: 30px;">Todos los cubículos están disponibles para reservar. Selecciona el que prefieras.</p>
+        
+        <!-- Filtros -->
+        <div class="filters">
+            <h3>Filtrar Cubículos</h3>
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" id="fecha">
+                </div>
+                <div class="filter-item">
+                    <label for="hora">Hora</label>
+                    <select id="hora">
+                        <option value="">Todas las horas</option>
+                        <option value="8:00">8:00 - 9:00</option>
+                        <option value="9:00">9:00 - 10:00</option>
+                        <option value="10:00">10:00 - 11:00</option>
+                        <option value="11:00">11:00 - 12:00</option>
+                        <option value="12:00">12:00 - 13:00</option>
+                        <option value="13:00">13:00 - 14:00</option>
+                        <option value="14:00">14:00 - 15:00</option>
+                        <option value="15:00">15:00 - 16:00</option>
+                        <option value="16:00">16:00 - 17:00</option>
+                        <option value="17:00">17:00 - 18:00</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="capacidad">Capacidad</label>
+                    <select id="capacidad">
+                        <option value="">Todas las capacidades</option>
+                        <option value="1">Individual (1 persona)</option>
+                        <option value="2">Grupo (2-4 personas)</option>
+                        <option value="4">Grupo (4-6 personas)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cubículos - TODOS DISPONIBLES -->
+        <div class="cubiculos-container">
+            <div class="cubiculo disponible">
+                <h3>Cubículo 1</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 2 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa, 2 sillas, enchufes</p>
+                    <p><strong>Piso:</strong> 1</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="1">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+            
+            <div class="cubiculo disponible">
+                <h3>Cubículo 2</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 4 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa, 4 sillas, pizarra</p>
+                    <p><strong>Piso:</strong> 1</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="2">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+            
+            <div class="cubiculo disponible">
+                <h3>Cubículo 3</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 2 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa, 2 sillas, enchufes</p>
+                    <p><strong>Piso:</strong> 1</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="3">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+            
+            <div class="cubiculo disponible">
+                <h3>Cubículo 4</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 6 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa grande, 6 sillas, proyector</p>
+                    <p><strong>Piso:</strong> 2</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="4">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+            
+            <div class="cubiculo disponible">
+                <h3>Cubículo 5</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 3 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa, 3 sillas, computadora</p>
+                    <p><strong>Piso:</strong> 2</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="5">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+            
+            <div class="cubiculo disponible">
+                <h3>Cubículo 6</h3>
+                <span class="estado">Disponible</span>
+                <div class="detalles">
+                    <p><strong>Capacidad:</strong> 2 personas</p>
+                    <p><strong>Equipamiento:</strong> Mesa, 2 sillas, enchufes</p>
+                    <p><strong>Piso:</strong> 2</p>
+                    <p><strong>Estado:</strong> Listo para usar</p>
+                </div>
+                <button class="btn reservar-btn" data-cubiculo="6">
+                    <i class="fas fa-calendar-check"></i> Reservar
+                </button>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="menu.html" class="nav-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Menú Principal
+            </a>
+            <a href="mis-reservas.html" class="nav-btn">
+                <i class="fas fa-list"></i> Ver Mis Reservas
+            </a>
+        </div>
+        
+        <footer>
+            <p>Sistema de Gestión de Biblioteca - © 2023 Instituto Tecnológico de Puebla</p>
+            <p>Versión 2.0 - Sistema en Tiempo Real | Usuario: <span id="footer-user">23221141</span></p>
+        </footer>
+    </div>
+    
+    <!-- Modal de reserva -->
+    <div id="reserva-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reservar Cubículo <span id="cubiculo-number"></span></h2>
+                <p>Complete la información para realizar su reserva</p>
+            </div>
+            <div class="modal-body">
+                <form id="reserva-form">
+                    <div class="form-group">
+                        <label for="fecha-reserva"><i class="fas fa-calendar-day"></i> Fecha de reserva</label>
+                        <input type="date" id="fecha-reserva" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora-inicio"><i class="fas fa-clock"></i> Hora de inicio</label>
+                        <select id="hora-inicio" required>
+                            <option value="">Seleccione una hora</option>
+                            <option value="8:00">8:00</option>
+                            <option value="9:00">9:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="13:00">13:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="duracion"><i class="fas fa-hourglass-half"></i> Duración (horas)</label>
+                        <select id="duracion" required>
+                            <option value="1">1 hora</option>
+                            <option value="2">2 horas</option>
+                            <option value="3">3 horas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="email-reserva"><i class="fas fa-envelope"></i> Correo electrónico</label>
+                        <input type="email" id="email-reserva" placeholder="Ingrese su correo electrónico" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancel-reserva" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" id="confirm-reserva" class="btn">
+                    <i class="fas fa-check"></i> Confirmar Reserva
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar información del usuario desde sessionStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            if (userData) {
+                document.getElementById('user-name').textContent = userData.name;
+                document.getElementById('user-id').textContent = userData.controlNumber;
+                document.getElementById('footer-user').textContent = userData.controlNumber;
+                document.getElementById('email-reserva').value = userData.email;
+            } else {
+                // Si no hay datos de usuario, redirigir al login
+                window.location.href = 'index.html';
+            }
+            
+            // Iniciar reloj en tiempo real
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+        
+        // Actualizar reloj
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        // Funcionalidad para el modal de reserva
+        document.querySelectorAll('.reservar-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const cubiculoNum = this.getAttribute('data-cubiculo');
+                document.getElementById('cubiculo-number').textContent = cubiculoNum;
+                document.getElementById('reserva-modal').style.display = 'flex';
+                
+                // Establecer fecha mínima como hoy
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('fecha-reserva').setAttribute('min', today);
+                document.getElementById('fecha-reserva').value = today;
+            });
+        });
+        
+        document.getElementById('cancel-reserva').addEventListener('click', function() {
+            document.getElementById('reserva-modal').style.display = 'none';
+        });
+        
+        document.getElementById('confirm-reserva').addEventListener('click', function() {
+            const fecha = document.getElementById('fecha-reserva').value;
+            const hora = document.getElementById('hora-inicio').value;
+            const duracion = document.getElementById('duracion').value;
+            const email = document.getElementById('email-reserva').value;
+            
+            if (!fecha || !hora || !duracion || !email) {
+                alert('Por favor, complete todos los campos requeridos.');
+                return;
+            }
+            
+            // Obtener información del usuario
+            const userData = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            // Simular reserva exitosa
+            alert(`¡Reserva confirmada para el Cubículo ${document.getElementById('cubiculo-number').textContent}!\nSe ha enviado un correo electrónico con los detalles.`);
+            
+            // Simular envío de correo
+            console.log(`Correo enviado a: ${email}`);
+            console.log(`Detalles de la reserva: Cubículo ${document.getElementById('cubiculo-number').textContent}, Fecha: ${fecha}, Hora: ${hora}, Duración: ${duracion} horas`);
+            
+            // Registrar en historial
+            const movimiento = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                tipo: 'reserva_cubiculo',
+                usuario: userData.controlNumber,
+                detalles: {
+                    cubiculo: document.getElementById('cubiculo-number').textContent,
+                    fecha: fecha,
+                    hora: hora,
+                    duracion: duracion
+                },
+                estado: 'confirmado'
+            };
+            
+            // Guardar en el historial (simulado)
+            let historial = JSON.parse(localStorage.getItem('historial_reservas') || '[]');
+            historial.push(movimiento);
+            localStorage.setItem('historial_reservas', JSON.stringify(historial));
+            
+            document.getElementById('reserva-modal').style.display = 'none';
+            
+            // Actualizar estado del cubículo
+            const cubiculo = document.querySelector(`.reservar-btn[data-cubiculo="${document.getElementById('cubiculo-number').textContent}"]`).closest('.cubiculo');
+            cubiculo.classList.remove('disponible');
+            cubiculo.classList.add('ocupado');
+            cubiculo.querySelector('.estado').textContent = 'Ocupado';
+            cubiculo.querySelector('.estado').className = 'estado';
+            cubiculo.querySelector('button').disabled = true;
+            cubiculo.querySelector('button').innerHTML = '<i class="fas fa-times-circle"></i> No disponible';
+            
+            // Actualizar contador de cubículos disponibles
+            updateAvailableCubicles();
+        });
+        
+        // Actualizar contador de cubículos disponibles
+        function updateAvailableCubicles() {
+            const disponibles = document.querySelectorAll('.cubiculo.disponible').length;
+            const total = document.querySelectorAll('.cubiculo').length;
+            document.getElementById('available-cubicles').textContent = `${disponibles}/${total}`;
+        }
+        
+        // Inicializar contador de cubículos disponibles
+        updateAvailableCubicles();
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('reserva-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
